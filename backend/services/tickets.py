@@ -10,6 +10,7 @@ from models.loan_account import LoanAccount
 from models.ticket import Ticket, TicketKind
 from models.user import User
 from services.visits import BookingError, get_branch
+from sockets import broadcast_branch
 
 # No 0/O or 1/I, so a reference read out over the phone is not misheard
 REFERENCE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
@@ -56,5 +57,6 @@ async def raise_ticket(
             await ticket.insert()
         except DuplicateKeyError:
             continue
+        await broadcast_branch(branch)
         return ticket, branch
     raise BookingError(503, "Please try again")

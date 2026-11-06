@@ -16,6 +16,7 @@ from models.branch_visit import BranchVisit, VisitPurpose, VisitStatus
 from models.loan_estimate import LoanEstimate
 from models.user import User
 from services.scheduling import Slot, bookable_slot, open_slots
+from sockets import broadcast_branch
 from time_utils import IST, as_utc, now_utc, today_ist
 
 BOOKING_WINDOW_DAYS = 14
@@ -121,6 +122,7 @@ async def book(
         await visit.insert()
     except DuplicateKeyError:
         raise _slot_taken() from None
+    await broadcast_branch(branch, visit)
     return visit, branch
 
 
@@ -134,6 +136,7 @@ async def cancel(customer: User, visit_id: PydanticObjectId) -> tuple[BranchVisi
     branch = await get_branch(visit.branch_id)
     visit.cancel()
     await visit.save()
+    await broadcast_branch(branch, visit)
     return visit, branch
 
 

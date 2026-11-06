@@ -29,9 +29,9 @@ def slot_key_for(slot_start: datetime) -> str:
 
 
 class BranchVisit(Document):
-    """A gold valuation slot booked at a branch."""
+    """A gold valuation slot booked at a branch, or a walk-in added by branch staff."""
 
-    customer_id: PydanticObjectId
+    customer_id: PydanticObjectId | None  # None for a walk-in without an account
     branch_id: PydanticObjectId
     slot_start: datetime  # UTC
     slot_end: datetime  # UTC
@@ -40,6 +40,7 @@ class BranchVisit(Document):
     # The estimate that led to this visit, if any: what the admin "leads" figure counts
     estimate_id: PydanticObjectId | None = None
     arrived_at: datetime | None = None
+    walk_in_name: str | None = None  # set for a walk-in: the name staff typed in
     created_at: datetime = Field(default_factory=now_utc)
     # What the no-double-booking index is built on. It equals the slot start while the
     # visit holds its slot; cancelling rewrites it to a per-visit value, which frees the

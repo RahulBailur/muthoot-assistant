@@ -24,6 +24,8 @@ os.environ["VOICE_MAX_STT_SECONDS"] = "0"
 os.environ["VAD_PROVIDER"] = "energy"
 os.environ["VAD_SILENCE_MS"] = "200"
 os.environ["RATE_LIMIT_VOICE_SESSIONS"] = "3/minute"
+# Tests must behave the same whether or not a frontend build happens to exist locally
+os.environ["FRONTEND_BUILD_DIR"] = "no-frontend-build-in-tests"
 # Fixed values, whatever the developer's own .env says
 os.environ["GOLD_RATE_24K_PER_GRAM"] = "12000"
 os.environ["LTV_LIMIT"] = "0.75"
