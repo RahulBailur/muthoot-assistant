@@ -1,0 +1,89 @@
+import logging
+import secrets
+import time
+from typing import Annotated
+
+from fastapi import APIRouter, Request
+from pydantic import BaseModel, Field, StringConstraints
+
+from agents.orchestrator import run_text_turn
+from auth_utils import CurrentUser
+from rate_limit import chat_limit, limiter
+from services.analytics import record_turn
+from services.redis_client import get_workflow_tracker
+
+logger = logging.getLogger(__name__)
+router = APIRouter(prefix="/api/chat", tags=["chat"])
+
+SessionId = Annotated[str, StringConstraints(pattern=r"^[A-Za-z0-9_-]{8,64}$")]
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(min_length=1, max_length=500)
+    # Omit on the first turn; send back the one returned to continue the conversation
+    session_id: SessionId | None = None
+
+
+class ChatResponse(BaseModel):
+    reply: str
+    session_id: str
+    intent: str
+    language: str
+    reply_language: str
+    # Set on every reply that gives a loan amount; the UI must show it
+    disclaimer: str | None
+    blocked: bool
+    guardrail: str | None
+    routed_by: str
+    used_llm: bool
+    cached: bool
+    answered_by: str
+    tools_called: list[str]
+
+
+class WorkflowEvent(BaseModel):
+    stage: str
+    turn: str
+    at: str
+    tool: str | None = None
+
+
+class WorkflowOut(BaseModel):
+    session_id: str
+    events: list[WorkflowEvent]
+
+
+@router.get("/{session_id}/workflow")
+async def visit_workflow(user: CurrentUser, session_id: SessionId) -> WorkflowOut:
+    """Where the visit bookings in one of the caller's own conversations have got to."""
+    events = await get_workflow_tracker().events(user.id, session_id)
+    return WorkflowOut(session_id=session_id, events=[WorkflowEvent(**e) for e in events])
+
+
+@router.post("")
+@limiter.limit(chat_limit)
+async def chat(request: Request, user: CurrentUser, body: ChatRequest) -> ChatResponse:
+    """One assistant text turn for the logged-in user."""
+    session_id = body.session_id or secrets.token_urlsafe(16)
+    started = time.monotonic()
+    result = await run_text_turn(user, body.message.strip() or body.message, session_id)
+    stages = {"total_ms": round((time.monotonic() - started) * 1000, 1)}
+    try:
+        await record_turn(pipeline="text", result=result, stages=stages)
+    except Exception:  # noqa: BLE001 — analytics must never cost the customer a reply
+        logger.exception("Could not record turn analytics")
+    return ChatResponse(
+        reply=result.reply,
+        session_id=session_id,
+        intent=result.intent.value,
+        language=result.language,
+        reply_language=result.reply_language,
+        disclaimer=result.disclaimer,
+        blocked=result.blocked,
+        guardrail=result.guardrail,
+        routed_by=result.routed_by,
+        used_llm=result.used_llm,
+        cached=result.cached,
+        answered_by=result.answered_by,
+        tools_called=result.tools_called,
+    )
