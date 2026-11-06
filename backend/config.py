@@ -15,10 +15,25 @@ class Settings(BaseSettings):
     jwt_expiry_hours: int = 12
     mongo_uri: str = "mongodb://localhost:27017/goldloan"
     use_mock_db: bool = False
-    # Empty switches the response cache off (used from M2)
+    # Empty switches the response cache off; a Redis that is down only costs a warning
     redis_url: str = ""
+    response_cache_ttl_s: int = 3600
     bcrypt_rounds: int = 12
     rate_limit_auth: str = "10/minute"
+    rate_limit_chat: str = "20/minute"
+    llm_provider: Literal["gemini", "ollama", "mock"] = "mock"
+    gemini_api_key: str = ""
+    gemini_text_model: str = ""
+    # A request slower than this counts as failed, and the next tier answers
+    llm_timeout_s: float = 8.0
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = ""  # empty = no local tier
+    ollama_timeout_s: float = 30.0
+    # After this many failures in a row a provider is skipped for the cool-down
+    gemini_breaker_threshold: int = 3
+    gemini_breaker_cooldown_s: float = 60.0
+    # Empty switches the embedding stage of the intent classifier off
+    intent_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     # Mock OTP. There is no SMS gateway in the demo, so the code is returned in the response.
     otp_ttl_s: int = Field(default=300, gt=0)
     otp_max_attempts: int = Field(default=5, gt=0)

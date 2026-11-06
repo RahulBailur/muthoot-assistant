@@ -3,7 +3,7 @@ from httpx import AsyncClient
 
 from models.ticket import Ticket
 from models.user import Role
-from routes.tickets import REFERENCE_ALPHABET
+from services.tickets import REFERENCE_ALPHABET
 from tests.helpers import auth, make_branch, make_loan, make_user
 
 

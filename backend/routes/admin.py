@@ -10,6 +10,7 @@ from models.loan_account import LoanAccount, LoanStatus
 from models.loan_estimate import LoanEstimate
 from models.ticket import Ticket, TicketStatus
 from models.user import Role, User
+from services.analytics import turn_summary
 from time_utils import ist_day_bounds, now_utc, today_ist
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -55,3 +56,12 @@ async def stats(admin: AdminUser, days: Annotated[int, Query(ge=1, le=90)] = 7) 
         "leads": leads,
         "lead_conversion": round(leads / estimates, 3) if estimates else 0.0,
     }
+
+
+@router.get("/analytics")
+async def analytics(
+    admin: AdminUser, days: Annotated[int, Query(ge=1, le=90)] = 7
+) -> dict[str, Any]:
+    """The assistant over the last `days`: top intents, language split, latency per stage,
+    which tier answered (the fallback rate), and guardrail activity. Timings and labels only."""
+    return await turn_summary(days)

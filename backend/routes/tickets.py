@@ -1,4 +1,3 @@
-import secrets
 from datetime import datetime
 from typing import Annotated, Literal
 
@@ -6,22 +5,17 @@ from beanie import PydanticObjectId
 from beanie.operators import In
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
-from pymongo.errors import DuplicateKeyError
 
 from auth_utils import CustomerUser, StaffUser, require_role
-from models.loan_account import LoanAccount
 from models.ticket import Ticket, TicketKind, TicketStatus
 from models.user import Role, User
 from privacy import mask_phone
-from services.visits import get_branch
+from services import tickets
 from time_utils import as_utc, now_utc
 
 router = APIRouter(prefix="/api/tickets", tags=["tickets"])
 
 StaffOrAdmin = Annotated[User, Depends(require_role(Role.STAFF, Role.ADMIN))]
-
-# No 0/O or 1/I, so a reference read out over the phone is not misheard
-REFERENCE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 
 STATUS_TRANSITIONS: dict[TicketStatus, set[TicketStatus]] = {
     TicketStatus.OPEN: {TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED},
@@ -72,39 +66,13 @@ class StaffTicketOut(TicketOut):
     customer_phone_masked: str  # staff call back through the system, not a copied number
 
 
-def new_reference() -> str:
-    return "GL-" + "".join(secrets.choice(REFERENCE_ALPHABET) for _ in range(6))
-
-
-async def _default_branch(customer: User) -> PydanticObjectId | None:
-    loan = await LoanAccount.find_one(LoanAccount.customer_id == customer.id)
-    return loan.branch_id if loan else None
-
-
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def raise_ticket(customer: CustomerUser, body: TicketRequest) -> TicketOut:
     """A complaint or callback request, routed to a branch's staff."""
-    branch_id = body.branch_id or await _default_branch(customer)
-    if branch_id is None:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please choose a branch")
-    branch = await get_branch(branch_id)
-    if customer.id is None or branch.id is None:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Please choose a branch")
-    for _ in range(3):  # a clash of random references is rare; try again if it happens
-        ticket = Ticket(
-            reference=new_reference(),
-            customer_id=customer.id,
-            branch_id=branch.id,
-            kind=body.kind,
-            message=body.message.strip(),
-            preferred_time=body.preferred_time,
-        )
-        try:
-            await ticket.insert()
-        except DuplicateKeyError:
-            continue
-        return TicketOut.build(ticket)
-    raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Please try again")
+    ticket, _ = await tickets.raise_ticket(
+        customer, body.kind, body.message, body.preferred_time, body.branch_id
+    )
+    return TicketOut.build(ticket)
 
 
 @router.get("/me")

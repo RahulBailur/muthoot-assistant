@@ -8,7 +8,13 @@ os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-bytes-long"
 os.environ["BCRYPT_ROUNDS"] = "4"
 os.environ["RATE_LIMIT_AUTH"] = "1000/minute"  # the rate-limit test sets its own
 os.environ["SEED_DEFAULT_PASSWORD"] = "seed-password-1"
-os.environ["REDIS_URL"] = ""
+os.environ["REDIS_URL"] = ""  # tests that want a cache build one on fakeredis
+# Never a real model in tests, whatever the developer's own .env says
+os.environ["LLM_PROVIDER"] = "mock"
+os.environ["GEMINI_API_KEY"] = ""
+os.environ["OLLAMA_MODEL"] = ""
+os.environ["INTENT_EMBEDDING_MODEL"] = ""
+os.environ["RATE_LIMIT_CHAT"] = "1000/minute"
 # Fixed values, whatever the developer's own .env says
 os.environ["GOLD_RATE_24K_PER_GRAM"] = "12000"
 os.environ["LTV_LIMIT"] = "0.75"

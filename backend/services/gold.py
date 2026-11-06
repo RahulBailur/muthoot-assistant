@@ -6,16 +6,18 @@ the gold is valued at a branch.
 """
 
 from dataclasses import dataclass
+from datetime import timedelta
 
 from beanie import PydanticObjectId
 
 from config import get_settings
 from models.gold_rate import GoldRate
 from models.loan_estimate import LoanEstimate
-from time_utils import today_ist
+from time_utils import now_utc, today_ist
 
 CARATS = (24, 22, 18)
 ROUND_TO = 100  # rupees; the estimate is rounded down to this
+REPEAT_WINDOW_MINUTES = 5
 
 DISCLAIMER = (
     "This is an estimate only. The final loan amount is decided after your gold is "
@@ -67,6 +69,19 @@ async def current_rate_24k() -> int:
     return today.rate_24k_per_gram if today else get_settings().gold_rate_24k_per_gram
 
 
+def rupees(amount: int) -> str:
+    """Indian digit grouping, as customers read it: 247500 -> ₹2,47,500."""
+    sign, digits = ("-", str(-amount)) if amount < 0 else ("", str(amount))
+    head, tail = digits[:-3], digits[-3:]
+    groups: list[str] = []
+    while len(head) > 2:
+        head, group = head[:-2], head[-2:]
+        groups.insert(0, group)
+    if head:
+        groups.insert(0, head)
+    return f"{sign}₹{','.join([*groups, tail])}"
+
+
 def rate_for_carat(rate_24k: int, carat: int) -> int:
     return round(rate_24k * carat / 24)
 
@@ -109,8 +124,20 @@ def calculate(grams: float, carat: int, rate_24k: int) -> Estimate:
 async def estimate(
     grams: float, carat: int, customer_id: PydanticObjectId | None = None
 ) -> tuple[Estimate, LoanEstimate]:
-    """Work out an estimate at today's rate and record it, so a later visit counts as a lead."""
+    """Work out an estimate at today's rate and record it, so a later visit counts as a lead.
+
+    The same customer asking the same thing again within a few minutes (a retry, or the
+    rule-based fallback redoing a turn) is one estimate, not two."""
     result = calculate(grams, carat, await current_rate_24k())
+    if customer_id is not None:
+        recent = await LoanEstimate.find_one(
+            LoanEstimate.customer_id == customer_id,
+            LoanEstimate.grams == grams,
+            LoanEstimate.carat == carat,
+            LoanEstimate.created_at >= now_utc() - timedelta(minutes=REPEAT_WINDOW_MINUTES),
+        )
+        if recent is not None:
+            return result, recent
     record = LoanEstimate(
         customer_id=customer_id,
         grams=grams,
