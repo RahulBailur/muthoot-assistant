@@ -1,18 +1,18 @@
-from datetime import date, datetime
+import secrets
+from datetime import date, datetime, timedelta
 from typing import Annotated, Literal
 
 from beanie import PydanticObjectId
-from beanie.operators import In
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import AwareDatetime, BaseModel
+from pydantic import AwareDatetime, BaseModel, Field
 
 from auth_utils import CurrentUser, CustomerUser, StaffUser, require_role
-from models.branch import Branch
 from models.branch_visit import BranchVisit, VisitPurpose, VisitStatus
 from models.user import Role, User
-from privacy import mask_phone
 from services import visits as booking
-from time_utils import as_utc, ist_day_bounds, now_utc, today_ist
+from services.branch_queue import StaffVisitOut, VisitOut, branch_visits, staff_visit_view
+from sockets import broadcast_branch
+from time_utils import now_utc
 
 router = APIRouter(prefix="/api/visits", tags=["visits"])
 
@@ -49,35 +49,11 @@ class StatusRequest(BaseModel):
     status: Literal[VisitStatus.ARRIVED, VisitStatus.VALUED, VisitStatus.NO_SHOW]
 
 
-class VisitOut(BaseModel):
-    id: str
-    branch_id: str
-    branch_name: str
-    slot_start: datetime
-    slot_end: datetime
-    purpose: VisitPurpose
-    status: VisitStatus
+class WalkInRequest(BaseModel):
+    """A customer who came in without booking. Only a name: no phone or account needed."""
 
-    @classmethod
-    def build(cls, visit: BranchVisit, branch_name: str) -> "VisitOut":
-        return cls(
-            id=str(visit.id),
-            branch_id=str(visit.branch_id),
-            branch_name=branch_name,
-            slot_start=as_utc(visit.slot_start),
-            slot_end=as_utc(visit.slot_end),
-            purpose=visit.purpose,
-            status=visit.status,
-        )
-
-
-class StaffVisitOut(VisitOut):
-    """What branch staff see: who is coming, with the phone masked."""
-
-    customer_name: str
-    customer_phone_masked: str
-    is_lead: bool  # booked after a loan estimate
-    arrived_at: datetime | None
+    name: str = Field(min_length=2, max_length=80)
+    purpose: VisitPurpose = VisitPurpose.NEW_LOAN
 
 
 @router.get("/availability")
@@ -125,27 +101,37 @@ async def branch_day(
     day: Annotated[date | None, Query(alias="date")] = None,
     branch_id: PydanticObjectId | None = None,
 ) -> list[StaffVisitOut]:
-    """A branch's valuation appointments for a day, in slot order. Staff see their own
-    branch only; an admin chooses one."""
+    """A branch's valuation visits and walk-ins for a day, in time order. Staff see their
+    own branch only; an admin chooses one."""
     if user.role == Role.STAFF:
         branch_id = user.branch_id
     if branch_id is None:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "branch_id is required")
-    branch = await booking.get_branch(branch_id)
-    day_start, day_end = ist_day_bounds(day or today_ist())
-    visits = (
-        await BranchVisit.find(
-            BranchVisit.branch_id == branch.id,
-            BranchVisit.slot_start >= day_start,
-            BranchVisit.slot_start < day_end,
-            BranchVisit.status != VisitStatus.CANCELLED,
-        )
-        .sort("+slot_start")
-        .to_list()
+    return await branch_visits(await booking.get_branch(branch_id), day)
+
+
+@router.post("/walk-in", status_code=status.HTTP_201_CREATED)
+async def walk_in(staff: StaffUser, body: WalkInRequest) -> StaffVisitOut:
+    """Add a walk-in to the staff member's own branch queue. They are already at the branch."""
+    if staff.branch_id is None:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "You are not assigned to a branch")
+    branch = await booking.get_branch(staff.branch_id)
+    now = now_utc()
+    visit = BranchVisit(
+        customer_id=None,
+        branch_id=staff.branch_id,
+        slot_start=now,
+        slot_end=now + timedelta(minutes=branch.slot_minutes),
+        purpose=body.purpose,
+        status=VisitStatus.ARRIVED,
+        arrived_at=now,
+        walk_in_name=body.name.strip(),
+        # Walk-ins hold no booking slot, so they never clash with one
+        slot_key=f"walk-in:{secrets.token_hex(8)}",
     )
-    customers = await User.find(In(User.id, [v.customer_id for v in visits])).to_list()
-    by_id = {customer.id: customer for customer in customers}
-    return [_staff_view(visit, branch, by_id.get(visit.customer_id)) for visit in visits]
+    await visit.insert()
+    await broadcast_branch(branch, visit)
+    return staff_visit_view(visit, branch, None)
 
 
 @router.put("/{visit_id}/status")
@@ -166,14 +152,6 @@ async def update_status(
         visit.arrived_at = now_utc()
     await visit.save()
     branch = await booking.get_branch(visit.branch_id)
-    return _staff_view(visit, branch, await User.get(visit.customer_id))
-
-
-def _staff_view(visit: BranchVisit, branch: Branch, customer: User | None) -> StaffVisitOut:
-    return StaffVisitOut(
-        **VisitOut.build(visit, branch.name).model_dump(),
-        customer_name=customer.name if customer else "Unknown",
-        customer_phone_masked=mask_phone(customer.phone) if customer else "",
-        is_lead=visit.estimate_id is not None,
-        arrived_at=as_utc(visit.arrived_at) if visit.arrived_at else None,
-    )
+    await broadcast_branch(branch, visit)
+    customer = await User.get(visit.customer_id) if visit.customer_id else None
+    return staff_visit_view(visit, branch, customer)

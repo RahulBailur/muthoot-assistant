@@ -1,6 +1,6 @@
 """Run the backend with an in-memory database, already seeded. No MongoDB or Docker needed.
 
-For looking at the API while developing (http://localhost:8000/docs). Everything is lost
+For trying the app while developing (build the frontend first: npm run build). Everything is lost
 when the server stops.
 
     python scripts/dev_server.py
@@ -32,8 +32,8 @@ async def main() -> None:
     await seed()
 
     password = get_settings().seed_default_password
-    print(f"\nGold Loan Assistant dev server: http://localhost:{PORT}/docs (in-memory, test mode)")
-    print(f"  customer  {CUSTOMERS[0][1]}  (log in with the OTP from /api/auth/otp/request)")
+    print(f"\nGold Loan Assistant: http://localhost:{PORT}  (API docs at /docs; in-memory data)")
+    print(f"  customer  {CUSTOMERS[0][1]}  (the demo OTP is shown on the login page)")
     print(f"  staff     {STAFF[0][1]}  password: {password}")
     print(f"  admin     {ADMIN[1]}  password: {password}\n")
 

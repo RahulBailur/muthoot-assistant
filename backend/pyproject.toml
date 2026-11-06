@@ -20,6 +20,7 @@ dependencies = [
     "httpx>=0.27",
     "redis>=5",
     "numpy>=2.0",
+    "python-socketio>=5.11",
 ]
 
 [project.optional-dependencies]
@@ -46,9 +47,11 @@ py-modules = [
     "auth_utils",
     "config",
     "database",
+    "frontend_app",
     "main",
     "privacy",
     "rate_limit",
+    "sockets",
     "time_utils",
 ]
 packages = ["agents", "memory", "models", "routes", "scripts", "services", "tools", "voice"]
@@ -91,5 +94,5 @@ explicit_package_bases = true
 exclude = ["\\.venv", "build"]
 
 [[tool.mypy.overrides]]
-module = ["slowapi.*", "mongomock_motor.*", "fakeredis.*", "fastembed.*", "onnxruntime.*"]
+module = ["slowapi.*", "mongomock_motor.*", "fakeredis.*", "fastembed.*", "onnxruntime.*", "socketio.*"]
 ignore_missing_imports = true
