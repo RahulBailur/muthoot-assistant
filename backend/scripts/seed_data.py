@@ -228,6 +228,14 @@ async def seed() -> dict[str, int]:
     return created
 
 
+async def seed_if_empty() -> bool:
+    """Seed only a database with no branches yet. True if it seeded."""
+    if await Branch.count() > 0:
+        return False
+    await seed()
+    return True
+
+
 async def main() -> None:
     await init_db()
     try:

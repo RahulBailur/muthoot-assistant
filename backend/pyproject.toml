@@ -32,6 +32,10 @@ ml = [
 voice = [
     "onnxruntime>=1.17",
 ]
+# The Locust load test (see loadtest/locustfile.py)
+load = [
+    "locust>=2.30",
+]
 dev = [
     "pytest>=8",
     "pytest-asyncio>=0.24",
@@ -54,7 +58,7 @@ py-modules = [
     "sockets",
     "time_utils",
 ]
-packages = ["agents", "memory", "models", "routes", "scripts", "services", "tools", "voice"]
+packages = ["agents", "eval", "memory", "models", "routes", "scripts", "services", "tools", "voice"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -83,6 +87,7 @@ select = ["E", "F", "I", "UP", "B", "ASYNC", "S"]
 # Names such as SHARES_SECRET describe what is looked for; no secret is stored there
 "agents/guardrails.py" = ["S105"]
 "scripts/*" = ["T201"]
+"eval/*" = ["T201"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -94,5 +99,5 @@ explicit_package_bases = true
 exclude = ["\\.venv", "build"]
 
 [[tool.mypy.overrides]]
-module = ["slowapi.*", "mongomock_motor.*", "fakeredis.*", "fastembed.*", "onnxruntime.*", "socketio.*"]
+module = ["slowapi.*", "mongomock_motor.*", "fakeredis.*", "fastembed.*", "onnxruntime.*", "socketio.*", "locust.*"]
 ignore_missing_imports = true

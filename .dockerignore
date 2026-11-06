@@ -1,0 +1,22 @@
+.git
+.github
+*.md
+
+# Secrets never go into an image
+.env
+.env.*
+
+# Rebuilt or fetched inside the image
+**/node_modules
+frontend/build
+models
+**/.venv
+**/__pycache__
+**/*.egg-info
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+
+backend/tests
+backend/loadtest/results
+frontend/src/__tests__

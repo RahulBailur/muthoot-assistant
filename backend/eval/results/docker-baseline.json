@@ -1,0 +1,187 @@
+{
+  "label": "docker-baseline",
+  "measured_at": "2026-11-06T17:52:56+00:00",
+  "config": {
+    "stt": "gnani:prisma-v3.0",
+    "tts": "gnani:timbre-v3.0",
+    "vad": "silero",
+    "vad_silence_ms": 500,
+    "llm_provider": "gemini",
+    "llm_model": "gemini-3.5-flash-lite",
+    "tts_chunking": "sentence"
+  },
+  "hardware": "laptop, Docker Desktop on Windows",
+  "summary": {
+    "end_of_speech_ms": {
+      "n": 6,
+      "p50": 551.4,
+      "p95": 670.3,
+      "min": 219.9,
+      "max": 670.3
+    },
+    "stt_ms": {
+      "n": 6,
+      "p50": 968.3,
+      "p95": 2614.2,
+      "min": 436.5,
+      "max": 2614.2
+    },
+    "routing_ms": {
+      "n": 6,
+      "p50": 41.5,
+      "p95": 139.0,
+      "min": 14.3,
+      "max": 139.0
+    },
+    "llm_ms": {
+      "n": 6,
+      "p50": 1237.7,
+      "p95": 3055.9,
+      "min": 1105.2,
+      "max": 3055.9
+    },
+    "tts_first_chunk_ms": {
+      "n": 6,
+      "p50": 3969.1,
+      "p95": 7158.6,
+      "min": 3114.2,
+      "max": 7158.6
+    },
+    "ttfa_ms": {
+      "n": 6,
+      "p50": 7408.4,
+      "p95": 9929.3,
+      "min": 7171.6,
+      "max": 9929.3
+    },
+    "total_ms": {
+      "n": 6,
+      "p50": 11452.5,
+      "p95": 15713.6,
+      "min": 7689.8,
+      "max": 15713.6
+    }
+  },
+  "turns": [
+    {
+      "intent": "calculator",
+      "client_ttfa_ms": 7803.2,
+      "stages": {
+        "end_of_speech_ms": 219.9,
+        "stt_ms": 2614.2,
+        "routing_ms": 61.5,
+        "llm_ms": 1398.6,
+        "tts_first_chunk_ms": 3114.2,
+        "ttfa_ms": 7408.4,
+        "total_ms": 11452.5
+      },
+      "routed_by": "keywords",
+      "used_llm": true,
+      "cache_hit": false,
+      "answered_by": "gemini",
+      "stt_provider": "gnani",
+      "tts_provider": "gnani",
+      "utterance": "hi-01"
+    },
+    {
+      "intent": "calculator",
+      "client_ttfa_ms": 9582.7,
+      "stages": {
+        "end_of_speech_ms": 376.5,
+        "stt_ms": 1180.9,
+        "routing_ms": 41.5,
+        "llm_ms": 1171.7,
+        "tts_first_chunk_ms": 7158.6,
+        "ttfa_ms": 9929.3,
+        "total_ms": 13402.6
+      },
+      "routed_by": "keywords",
+      "used_llm": true,
+      "cache_hit": false,
+      "answered_by": "gemini",
+      "stt_provider": "gnani",
+      "tts_provider": "gnani",
+      "utterance": "en-01"
+    },
+    {
+      "intent": "account",
+      "client_ttfa_ms": 7170.1,
+      "stages": {
+        "end_of_speech_ms": 636.0,
+        "stt_ms": 1525.3,
+        "routing_ms": 139.0,
+        "llm_ms": 1105.2,
+        "tts_first_chunk_ms": 3969.1,
+        "ttfa_ms": 7374.6,
+        "total_ms": 8581.2
+      },
+      "routed_by": "keywords",
+      "used_llm": true,
+      "cache_hit": false,
+      "answered_by": "gemini",
+      "stt_provider": "gnani",
+      "tts_provider": "gnani",
+      "utterance": "en-07"
+    },
+    {
+      "intent": "help",
+      "client_ttfa_ms": 7377.3,
+      "stages": {
+        "end_of_speech_ms": 670.3,
+        "stt_ms": 436.5,
+        "routing_ms": 14.3,
+        "llm_ms": 3055.9,
+        "tts_first_chunk_ms": 3486.6,
+        "ttfa_ms": 7663.7,
+        "total_ms": 7689.8
+      },
+      "routed_by": "keywords",
+      "used_llm": true,
+      "cache_hit": false,
+      "answered_by": "gemini",
+      "stt_provider": "gnani",
+      "tts_provider": "gnani",
+      "utterance": "en-10"
+    },
+    {
+      "intent": "calculator",
+      "client_ttfa_ms": 7257.1,
+      "stages": {
+        "end_of_speech_ms": 551.4,
+        "stt_ms": 796.9,
+        "routing_ms": 40.8,
+        "llm_ms": 1237.7,
+        "tts_first_chunk_ms": 4544.8,
+        "ttfa_ms": 7171.6,
+        "total_ms": 14075.4
+      },
+      "routed_by": "keywords",
+      "used_llm": true,
+      "cache_hit": false,
+      "answered_by": "gemini",
+      "stt_provider": "gnani",
+      "tts_provider": "gnani",
+      "utterance": "ml-01"
+    },
+    {
+      "intent": "calculator",
+      "client_ttfa_ms": 9360.1,
+      "stages": {
+        "end_of_speech_ms": 568.7,
+        "stt_ms": 968.3,
+        "routing_ms": 62.6,
+        "llm_ms": 1487.3,
+        "tts_first_chunk_ms": 6800.9,
+        "ttfa_ms": 9887.8,
+        "total_ms": 15713.6
+      },
+      "routed_by": "keywords",
+      "used_llm": true,
+      "cache_hit": false,
+      "answered_by": "gemini",
+      "stt_provider": "gnani",
+      "tts_provider": "gnani",
+      "utterance": "ta-01"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Keep LF line endings on every platform, so formatters agree on Windows and in CI
+* text=auto eol=lf
+*.png binary
+*.gif binary
+*.onnx binary
+*.wav binary

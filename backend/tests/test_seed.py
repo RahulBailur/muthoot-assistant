@@ -5,7 +5,7 @@ from models.branch_visit import BranchVisit
 from models.loan_account import LoanAccount
 from models.ticket import Ticket
 from models.user import Role, User
-from scripts.seed_data import BRANCHES, CUSTOMERS, LOANS, STAFF, seed
+from scripts.seed_data import BRANCHES, CUSTOMERS, LOANS, STAFF, seed, seed_if_empty
 from services.loans import ReminderKind, reminders_for
 from time_utils import today_ist
 
@@ -65,3 +65,11 @@ async def test_seeded_staff_can_log_in(client: AsyncClient) -> None:
 
     assert response.status_code == 200
     assert response.json()["user"]["role"] == "staff"
+
+
+async def test_seed_on_start_fills_only_an_empty_database(client: AsyncClient) -> None:
+    assert await seed_if_empty() is True
+    users = await User.count()
+
+    assert await seed_if_empty() is False
+    assert await User.count() == users
