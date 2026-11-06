@@ -34,6 +34,27 @@ class Settings(BaseSettings):
     gemini_breaker_cooldown_s: float = 60.0
     # Empty switches the embedding stage of the intent classifier off
     intent_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    # Voice. The safe defaults call no paid API; real runs set gnani in .env
+    stt_provider: Literal["gnani", "mock"] = "mock"
+    tts_provider: Literal["gnani", "mock"] = "mock"
+    gnani_api_key: str = ""
+    gnani_stt_model: str = "prisma-v3.0"
+    # indic-auto lets the model tell which of our languages was spoken
+    gnani_stt_language: str = "indic-auto"
+    gnani_tts_model: str = "timbre-v3.0"
+    gnani_tts_voice: str = "Lakshmi"  # a timbre-v3.0 voice speaks all our languages
+    gnani_tts_sample_rate: int = 24_000
+    gnani_timeout_s: float = 15.0
+    # Hard caps on Gnani use, counted in the database; 0 = no cap. Past a cap, voice turns
+    # carry on as text, so the free credits are never run dry in the middle of a demo.
+    voice_max_tts_chars: int = Field(default=0, ge=0)
+    voice_max_stt_seconds: int = Field(default=0, ge=0)
+    tts_cache_entries: int = Field(default=256, ge=0)  # synthesised sentences kept in memory
+    vad_provider: Literal["silero", "energy"] = "energy"
+    silero_vad_model: str = "../models/silero_vad_v6.onnx"
+    vad_silence_ms: int = 500
+    tts_chunking: Literal["sentence", "reply"] = "sentence"
+    rate_limit_voice_sessions: str = "5/minute"
     # Mock OTP. There is no SMS gateway in the demo, so the code is returned in the response.
     otp_ttl_s: int = Field(default=300, gt=0)
     otp_max_attempts: int = Field(default=5, gt=0)

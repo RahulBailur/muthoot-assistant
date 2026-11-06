@@ -11,6 +11,7 @@ from models.pending_action import PendingAction
 from models.ticket import Ticket
 from models.turn_analytics import TurnAnalytics
 from models.user import User
+from models.voice_usage import VoiceUsage
 
 DOCUMENT_MODELS: list[type[Document]] = [
     User,
@@ -24,6 +25,7 @@ DOCUMENT_MODELS: list[type[Document]] = [
     ConversationTurn,
     PendingAction,
     TurnAnalytics,
+    VoiceUsage,
 ]
 
 __all__ = [
@@ -39,4 +41,5 @@ __all__ = [
     "Ticket",
     "TurnAnalytics",
     "User",
+    "VoiceUsage",
 ]

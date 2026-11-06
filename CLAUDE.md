@@ -94,8 +94,10 @@ Disclaimers and safe fallback replies in every supported language.
    Languages: en-IN, hi-IN, kn-IN, **ml-IN, ta-IN** → all five are in scope. Free tier has limited
    credits (5k), so tests and CI always use the mock provider; only manual demo runs hit Gnani.
    Check the current API reference at https://docs.gnani.ai/llms.txt before writing M3.
-   The docs don't say what a credit counts. In M3, measure it: one short STT + one short TTS call,
-   with Rahul reading the dashboard counter before and after. Limits that shape M3: running out of
+   Measured 2026-11-06 (scripts/gnani_probe.py): **1 credit = ₹1**; TTS timbre-v3.0 cost 0.07 credits
+   for 37 characters (~0.002/char, ~₹1.9 per 1,000 chars). STT per-second cost not read yet (the
+   sidebar badge rounds; the Usage page "Credits Consumed" card is exact). Caps in .env:
+   VOICE_MAX_TTS_CHARS=200000, VOICE_MAX_STT_SECONDS=18000. Limits that shape M3: running out of
    credit → HTTP 402; free tier allows **1 active request at a time** (429 `RATE_LIMITED`, no
    Retry-After), so TTS sentence chunks must be sent one after another, never in parallel;
    REST STT clips max 30 s.

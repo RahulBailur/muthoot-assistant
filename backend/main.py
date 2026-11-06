@@ -9,7 +9,7 @@ from slowapi.errors import RateLimitExceeded
 from config import get_settings
 from database import close_db, init_db
 from rate_limit import limiter
-from routes import admin, auth, branches, chat, gold, loans, tickets, visits
+from routes import admin, auth, branches, chat, gold, loans, tickets, visits, voice_ws
 from services.visits import BookingError
 
 
@@ -39,6 +39,7 @@ app.include_router(visits.router)
 app.include_router(tickets.router)
 app.include_router(chat.router)
 app.include_router(admin.router)
+app.include_router(voice_ws.router)
 
 
 @app.get("/api/health", tags=["health"])

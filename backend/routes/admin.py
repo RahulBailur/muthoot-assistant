@@ -4,13 +4,16 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Query
 
 from auth_utils import AdminUser
+from config import get_settings
 from models.branch import Branch
 from models.branch_visit import BranchVisit, VisitStatus
 from models.loan_account import LoanAccount, LoanStatus
 from models.loan_estimate import LoanEstimate
 from models.ticket import Ticket, TicketStatus
 from models.user import Role, User
+from services import voice_usage
 from services.analytics import turn_summary
+from services.gnani import out_of_credit
 from time_utils import ist_day_bounds, now_utc, today_ist
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -65,3 +68,22 @@ async def analytics(
     """The assistant over the last `days`: top intents, language split, latency per stage,
     which tier answered (the fallback rate), and guardrail activity. Timings and labels only."""
     return await turn_summary(days)
+
+
+@router.get("/voice-usage")
+async def voice_usage_summary(admin: AdminUser) -> dict[str, Any]:
+    """How much of the paid speech APIs has been used, against the caps in config."""
+    settings = get_settings()
+    usage = await voice_usage.current()
+    return {
+        "stt_requests": usage.stt_requests,
+        "stt_seconds": round(usage.stt_seconds, 1),
+        "tts_requests": usage.tts_requests,
+        "tts_chars": usage.tts_chars,
+        "tts_cache_hits": usage.tts_cache_hits,
+        "caps": {
+            "stt_seconds": settings.voice_max_stt_seconds or None,
+            "tts_chars": settings.voice_max_tts_chars or None,
+        },
+        "out_of_credit": out_of_credit(),
+    }
