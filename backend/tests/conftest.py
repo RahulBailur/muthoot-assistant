@@ -1,0 +1,36 @@
+import os
+from collections.abc import AsyncIterator
+
+# Must be set before any application module reads its settings
+os.environ["ENVIRONMENT"] = "test"
+os.environ["USE_MOCK_DB"] = "true"
+os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-bytes-long"
+os.environ["BCRYPT_ROUNDS"] = "4"
+os.environ["RATE_LIMIT_AUTH"] = "1000/minute"  # the rate-limit test sets its own
+os.environ["SEED_DEFAULT_PASSWORD"] = "seed-password-1"
+os.environ["REDIS_URL"] = ""
+# Fixed values, whatever the developer's own .env says
+os.environ["GOLD_RATE_24K_PER_GRAM"] = "12000"
+os.environ["LTV_LIMIT"] = "0.75"
+os.environ["ESTIMATE_DEDUCTION"] = "0.10"
+os.environ["AUCTION_GRACE_DAYS"] = "30"
+os.environ["OTP_TTL_S"] = "300"
+os.environ["OTP_MAX_ATTEMPTS"] = "3"
+os.environ["OTP_REVEAL_IN_RESPONSE"] = "true"
+
+import pytest  # noqa: E402
+from httpx import ASGITransport, AsyncClient  # noqa: E402
+
+from database import close_db, init_db  # noqa: E402
+from main import app  # noqa: E402
+from rate_limit import limiter  # noqa: E402
+
+
+@pytest.fixture
+async def client() -> AsyncIterator[AsyncClient]:
+    """HTTP client against the app, with a fresh in-memory database per test."""
+    await init_db()
+    limiter.reset()
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as http:
+        yield http
+    close_db()
