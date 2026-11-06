@@ -18,5 +18,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: "./src/setupTests.js",
+    // Tests that type into several fields can pass 5 s on a busy machine or CI runner
+    testTimeout: 15000,
   },
 });

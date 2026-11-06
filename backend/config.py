@@ -68,6 +68,8 @@ class Settings(BaseSettings):
     # Days after maturity before an unpaid loan gets an auction notice
     auction_grace_days: int = Field(default=30, ge=0)
     seed_default_password: str = ""
+    # Seed the mock dataset at start-up if the database has none: for hosts with no shell
+    seed_on_start: bool = False
     frontend_build_dir: str = "../frontend/build"
 
     @model_validator(mode="after")

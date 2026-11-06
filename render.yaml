@@ -1,0 +1,69 @@
+# Render Blueprint for the public demo: New -> Blueprint -> pick this repository.
+# Render asks for the values marked `sync: false`; everything else is set here.
+#
+# Render's free instance has 512 MB of memory and a tenth of a CPU. Speech runs on Gnani's
+# servers, so voice works here; only the local embedding model is left out (it needs about
+# 300 MB), and routing uses keyword rules with Gemini for the rest. The full app runs with
+# Docker Compose (see the README).
+
+services:
+  - type: web
+    name: goldloan-assistant
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass  # deploy main only once CI has passed
+    envVars:
+      - key: ENVIRONMENT
+        value: demo
+      - key: JWT_SECRET
+        generateValue: true
+      # Secrets and model IDs, entered in Render's dashboard and never committed
+      - key: MONGO_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_TEXT_MODEL
+        sync: false
+      - key: GNANI_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: STT_PROVIDER
+        value: gnani
+      - key: TTS_PROVIDER
+        value: gnani
+      - key: VAD_PROVIDER
+        value: silero
+      # Lite: no local embedding model on 512 MB
+      - key: INTENT_EMBEDDING_MODEL
+        value: ""
+      # The demo data goes in on the first start, as there is no shell to run the seed from.
+      # The password is the published demo password, not a secret.
+      - key: SEED_ON_START
+        value: "true"
+      - key: SEED_DEFAULT_PASSWORD
+        value: goldloan-demo-1
+      # There is no SMS gateway: the login page shows the one-time code
+      - key: OTP_REVEAL_IN_RESPONSE
+        value: "true"
+      # A public link: tighter caps on the client's speech credits (about 190 credits of
+      # speech, 2 hours of listening). Past a cap, replies are shown as text.
+      - key: VOICE_MAX_TTS_CHARS
+        value: "100000"
+      - key: VOICE_MAX_STT_SECONDS
+        value: "7200"
+      - key: RATE_LIMIT_VOICE_SESSIONS
+        value: "3/minute"
+      # A tenth of a CPU: cheaper password hashing keeps staff logins near a second
+      - key: BCRYPT_ROUNDS
+        value: "10"
+      # Render's proxy is the only way in, so trust the client address it forwards;
+      # otherwise every visitor would share one rate limit
+      - key: FORWARDED_ALLOW_IPS
+        value: "*"

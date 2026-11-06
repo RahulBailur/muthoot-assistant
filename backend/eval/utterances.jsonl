@@ -1,0 +1,51 @@
+{"id": "en-01", "lang": "en", "intent": "calculator", "text": "I have 30 grams of gold, how much loan can I get?"}
+{"id": "en-02", "lang": "en", "intent": "calculator", "text": "What loan amount for 4 pavan of 22 carat jewellery?"}
+{"id": "en-03", "lang": "en", "intent": "calculator", "text": "Can you estimate a loan for 50 g of 24 carat gold"}
+{"id": "en-04", "lang": "en", "intent": "visit", "text": "Book a valuation slot at the Kochi branch tomorrow"}
+{"id": "en-05", "lang": "en", "intent": "visit", "text": "Please cancel my branch visit on Friday"}
+{"id": "en-06", "lang": "en", "intent": "visit", "text": "I want to book an appointment at the Chennai branch"}
+{"id": "en-07", "lang": "en", "intent": "account", "text": "What is my outstanding amount?"}
+{"id": "en-08", "lang": "en", "intent": "account", "text": "When is my interest due date?"}
+{"id": "en-09", "lang": "en", "intent": "account", "text": "Can I renew my gold loan before maturity?"}
+{"id": "en-10", "lang": "en", "intent": "help", "text": "What documents do I need for a gold loan?"}
+{"id": "en-11", "lang": "en", "intent": "help", "text": "What is the gold rate today?"}
+{"id": "en-12", "lang": "en", "intent": "help", "text": "I want to make a complaint about the branch staff"}
+{"id": "en-13", "lang": "en", "intent": "help", "text": "Is part payment allowed on my loan?"}
+{"id": "en-14", "lang": "en", "intent": "help", "text": "Please call me back this evening"}
+{"id": "en-15", "lang": "en", "intent": "general", "text": "Hello there"}
+{"id": "en-16", "lang": "en", "intent": "general", "text": "Thank you so much"}
+{"id": "hi-01", "lang": "hi", "intent": "calculator", "text": "Mere paas 30 gram sona hai, kitna loan milega?"}
+{"id": "hi-02", "lang": "hi", "intent": "calculator", "text": "मेरे पास 30 ग्राम सोना है, कितना लोन मिलेगा?"}
+{"id": "hi-03", "lang": "hi", "intent": "calculator", "text": "22 कैरेट के 20 ग्राम पर कितना मिलेगा"}
+{"id": "hi-04", "lang": "hi", "intent": "visit", "text": "कल के लिए शाखा विज़िट बुक करो"}
+{"id": "hi-05", "lang": "hi", "intent": "visit", "text": "kal branch visit book karna hai"}
+{"id": "hi-06", "lang": "hi", "intent": "account", "text": "मेरा लोन बकाया कितना है"}
+{"id": "hi-07", "lang": "hi", "intent": "account", "text": "mera loan baaki kitna hai"}
+{"id": "hi-08", "lang": "hi", "intent": "help", "text": "गोल्ड लोन के लिए कौन से दस्तावेज़ चाहिए"}
+{"id": "hi-09", "lang": "hi", "intent": "help", "text": "आज सोने का भाव क्या है"}
+{"id": "hi-10", "lang": "hi", "intent": "help", "text": "मुझे शिकायत दर्ज करनी है"}
+{"id": "hi-11", "lang": "hi", "intent": "general", "text": "नमस्ते"}
+{"id": "kn-01", "lang": "kn", "intent": "calculator", "text": "ನನ್ನ ಬಳಿ 30 ಗ್ರಾಂ ಚಿನ್ನ ಇದೆ, ಎಷ್ಟು ಸಾಲ ಸಿಗುತ್ತದೆ?"}
+{"id": "kn-02", "lang": "kn", "intent": "visit", "text": "ನಾಳೆ ಶಾಖೆ ಭೇಟಿ ಬುಕ್ ಮಾಡಿ"}
+{"id": "kn-03", "lang": "kn", "intent": "account", "text": "ನನ್ನ ಸಾಲದ ಬಾಕಿ ಎಷ್ಟು"}
+{"id": "kn-04", "lang": "kn", "intent": "help", "text": "ಯಾವ ದಾಖಲೆಗಳು ಬೇಕು"}
+{"id": "kn-05", "lang": "kn", "intent": "help", "text": "ಇಂದಿನ ಚಿನ್ನದ ದರ ಎಷ್ಟು"}
+{"id": "kn-06", "lang": "kn", "intent": "help", "text": "ನಾನು ದೂರು ನೀಡಬೇಕು"}
+{"id": "kn-07", "lang": "kn", "intent": "general", "text": "ನಮಸ್ಕಾರ"}
+{"id": "ml-01", "lang": "ml", "intent": "calculator", "text": "എന്റെ കയ്യിൽ 4 പവൻ സ്വർണമുണ്ട്, എത്ര വായ്പ കിട്ടും?"}
+{"id": "ml-02", "lang": "ml", "intent": "calculator", "text": "30 ഗ്രാം സ്വർണത്തിന് എത്ര രൂപ കിട്ടും"}
+{"id": "ml-03", "lang": "ml", "intent": "visit", "text": "നാളെ ബ്രാഞ്ച് സന്ദർശനം ബുക്ക് ചെയ്യണം"}
+{"id": "ml-04", "lang": "ml", "intent": "account", "text": "എന്റെ വായ്പയുടെ ബാക്കി എത്ര"}
+{"id": "ml-05", "lang": "ml", "intent": "account", "text": "എന്റെ അക്കൗണ്ട് വിവരങ്ങൾ പറയൂ"}
+{"id": "ml-06", "lang": "ml", "intent": "help", "text": "എന്തൊക്കെ രേഖകൾ വേണം"}
+{"id": "ml-07", "lang": "ml", "intent": "help", "text": "ഇന്നത്തെ സ്വർണവില എത്ര"}
+{"id": "ml-08", "lang": "ml", "intent": "help", "text": "എനിക്ക് ഒരു പരാതി ഉണ്ട്"}
+{"id": "ml-09", "lang": "ml", "intent": "general", "text": "നമസ്കാരം"}
+{"id": "ta-01", "lang": "ta", "intent": "calculator", "text": "என்னிடம் 30 கிராம் தங்கம் உள்ளது, எவ்வளவு கடன் கிடைக்கும்?"}
+{"id": "ta-02", "lang": "ta", "intent": "calculator", "text": "5 பவுன் நகைக்கு எவ்வளவு கடன்"}
+{"id": "ta-03", "lang": "ta", "intent": "visit", "text": "நாளை கிளை வருகை முன்பதிவு செய்யுங்கள்"}
+{"id": "ta-04", "lang": "ta", "intent": "account", "text": "என் கடன் நிலுவை எவ்வளவு"}
+{"id": "ta-05", "lang": "ta", "intent": "help", "text": "என்ன ஆவணங்கள் வேண்டும்"}
+{"id": "ta-06", "lang": "ta", "intent": "help", "text": "இன்றைய தங்க விலை என்ன"}
+{"id": "ta-07", "lang": "ta", "intent": "help", "text": "நான் புகார் கொடுக்க வேண்டும்"}
+{"id": "ta-08", "lang": "ta", "intent": "general", "text": "வணக்கம்"}

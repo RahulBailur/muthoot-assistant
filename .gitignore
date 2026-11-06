@@ -33,3 +33,6 @@ dumps/
 # Python packaging
 *.egg-info/
 build/
+
+# Benchmark audio, rebuilt by scripts/make_eval_audio.py
+backend/eval/audio/

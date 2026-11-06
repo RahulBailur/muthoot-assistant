@@ -30,6 +30,8 @@ PIPELINE = "cascade"
 BARGE_IN_MIN_SPEECH_MS = 256  # stricter than a normal start, so echo and coughs are ignored
 PLAYBACK_GRACE_S = 3.0
 MIN_CHUNK_CHARS = 24
+# The first piece spoken is cut to about this length, so the first audio comes sooner
+FIRST_CHUNK_MAX_CHARS = 60
 STT_FAILED = "Sorry, I could not hear that. Please try again, or type your question."
 
 SendJson = Callable[[dict[str, Any]], Awaitable[None]]
@@ -77,6 +79,32 @@ def split_sentences(text: str, min_chars: int = MIN_CHUNK_CHARS) -> list[str]:
         else:
             chunks.append(piece)
     return chunks
+
+
+def shorten_first(chunks: list[str], max_chars: int = FIRST_CHUNK_MAX_CHARS) -> list[str]:
+    """Cut a long first sentence in two, so the first sound comes sooner.
+
+    Gnani's REST TTS returns a sentence only once all of it is synthesised, and that takes
+    longer the longer the sentence is: on the benchmark it was most of the wait for the first
+    audio. The cut is at the last comma before `max_chars`, or failing that the last space,
+    and never leaves a scrap shorter than MIN_CHUNK_CHARS on either side.
+    """
+    if not chunks or len(chunks[0]) <= max_chars:
+        return chunks
+    first = chunks[0]
+
+    def fits(cut: int) -> bool:
+        return cut >= MIN_CHUNK_CHARS and len(first) - cut > MIN_CHUNK_CHARS
+
+    commas = [i for i in range(max_chars) if first.startswith(", ", i) and fits(i + 1)]
+    spaces = [i for i in range(max_chars) if first[i] == " " and fits(i)]
+    if commas:
+        cut = commas[-1] + 1  # keep the comma with the first piece
+    elif spaces:
+        cut = spaces[-1]
+    else:
+        return chunks
+    return [first[:cut].strip(), first[cut:].strip(), *chunks[1:]]
 
 
 class VoiceSession:
@@ -254,7 +282,11 @@ class VoiceSession:
         """Synthesise and send the reply. Returns the seconds sent and which voice spoke."""
         # The estimate disclaimer is part of the answer, so it is spoken, not only shown
         spoken_text = f"{result.reply} {result.disclaimer}" if result.disclaimer else result.reply
-        chunks = split_sentences(spoken_text) if self._chunking == "sentence" else [spoken_text]
+        chunks = (
+            shorten_first(split_sentences(spoken_text))
+            if self._chunking == "sentence"
+            else [spoken_text]
+        )
         seconds, voice = 0.0, ""
         try:
             for chunk in chunks:

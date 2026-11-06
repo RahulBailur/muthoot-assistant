@@ -1,0 +1,25 @@
+{"id": "h-en-01", "lang": "en", "intent": "calculator", "text": "My wife has two old bangles, what could we borrow on them?"}
+{"id": "h-en-02", "lang": "en", "intent": "calculator", "text": "If I pledge a chain of about twenty grams, what would I receive"}
+{"id": "h-en-03", "lang": "en", "intent": "visit", "text": "I'd like to come in on Saturday so someone can check my jewellery"}
+{"id": "h-en-04", "lang": "en", "intent": "visit", "text": "Is there a free time at the Mumbai office on Monday?"}
+{"id": "h-en-05", "lang": "en", "intent": "account", "text": "How much do I still owe you?"}
+{"id": "h-en-06", "lang": "en", "intent": "account", "text": "Is my payment late?"}
+{"id": "h-en-07", "lang": "en", "intent": "help", "text": "Which ID cards should I carry?"}
+{"id": "h-en-08", "lang": "en", "intent": "help", "text": "Till what time is the Bengaluru office working on Saturday?"}
+{"id": "h-en-09", "lang": "en", "intent": "help", "text": "The staff were rude to me yesterday"}
+{"id": "h-en-10", "lang": "en", "intent": "general", "text": "good evening"}
+{"id": "h-hi-01", "lang": "hi", "intent": "calculator", "text": "हार गिरवी रखूँ तो कितने पैसे मिलेंगे"}
+{"id": "h-hi-02", "lang": "hi", "intent": "visit", "text": "शनिवार को सोना जँचवाने आना है"}
+{"id": "h-hi-03", "lang": "hi", "intent": "account", "text": "मुझे अभी और कितना चुकाना है"}
+{"id": "h-hi-04", "lang": "hi", "intent": "help", "text": "शाखा कितने बजे खुलती है"}
+{"id": "h-hi-05", "lang": "hi", "intent": "general", "text": "शुक्रिया"}
+{"id": "h-kn-01", "lang": "kn", "intent": "calculator", "text": "ನನ್ನ ಬಳೆಗಳ ಮೇಲೆ ಎಷ್ಟು ಹಣ ಸಿಗುತ್ತದೆ"}
+{"id": "h-kn-02", "lang": "kn", "intent": "account", "text": "ನಾನು ಇನ್ನೂ ಎಷ್ಟು ಕಟ್ಟಬೇಕು"}
+{"id": "h-kn-03", "lang": "kn", "intent": "help", "text": "ಶಾಖೆ ಎಷ್ಟು ಗಂಟೆಗೆ ತೆರೆಯುತ್ತದೆ"}
+{"id": "h-ml-01", "lang": "ml", "intent": "calculator", "text": "എന്റെ മാല പണയം വെച്ചാൽ എത്ര കിട്ടും"}
+{"id": "h-ml-02", "lang": "ml", "intent": "visit", "text": "ശനിയാഴ്ച സ്വർണം പരിശോധിക്കാൻ വരണം"}
+{"id": "h-ml-03", "lang": "ml", "intent": "account", "text": "ഇനി എത്ര അടയ്ക്കാനുണ്ട്"}
+{"id": "h-ml-04", "lang": "ml", "intent": "help", "text": "ബ്രാഞ്ച് എപ്പോൾ തുറക്കും"}
+{"id": "h-ta-01", "lang": "ta", "intent": "calculator", "text": "என் வளையல்களை அடகு வைத்தால் எவ்வளவு கிடைக்கும்"}
+{"id": "h-ta-02", "lang": "ta", "intent": "account", "text": "இன்னும் எவ்வளவு கட்ட வேண்டும்"}
+{"id": "h-ta-03", "lang": "ta", "intent": "help", "text": "கிளை எப்போது திறக்கும்"}

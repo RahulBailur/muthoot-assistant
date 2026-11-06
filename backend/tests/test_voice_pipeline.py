@@ -28,7 +28,7 @@ from voice.audio_utils import (
     resample,
     to_wav,
 )
-from voice.cascade_pipeline import VoiceSession, VoiceState, split_sentences
+from voice.cascade_pipeline import VoiceSession, VoiceState, shorten_first, split_sentences
 from voice.timing import TurnTimer
 from voice.vad import SpeechDetector, VADConfig, energy_vad
 
@@ -476,3 +476,32 @@ async def test_mock_tts_returns_silence_of_a_sensible_length() -> None:
 
     assert speech.sample_rate == 24_000 and 0.4 < speech.seconds < 0.7
     assert set(speech.pcm16) == {0}
+
+
+# --- a shorter first piece --------------------------------------------------------------
+
+
+def test_a_long_first_sentence_is_cut_at_a_comma() -> None:
+    first = "For 30 grams of 22 carat gold, you could get about Rs 2,22,700 to Rs 2,47,500."
+
+    head, tail = shorten_first([first, "Shall I book a visit?"])[:2]
+
+    assert head == "For 30 grams of 22 carat gold,"
+    assert tail == "you could get about Rs 2,22,700 to Rs 2,47,500."
+
+
+def test_without_a_comma_it_is_cut_at_a_word() -> None:
+    first = "30 ग्राम 22 कैरेट सोने पर आपको लगभग ₹2,22,700 से ₹2,47,500 तक का लोन मिल सकता है।"
+
+    pieces = shorten_first([first])
+
+    assert len(pieces) == 2 and " ".join(pieces) == first
+    assert len(pieces[0]) <= 60 and not pieces[0].endswith(" ")
+
+
+@pytest.mark.parametrize(
+    "chunks",
+    [[], ["A short reply that needs no cut."], ["x" * 100]],  # the last has nowhere to cut
+)
+def test_short_or_uncuttable_first_sentences_are_left_alone(chunks: list[str]) -> None:
+    assert shorten_first(chunks) == chunks
