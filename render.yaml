@@ -1,5 +1,7 @@
 # Render Blueprint for the public demo: New -> Blueprint -> pick this repository.
 # Render asks for the values marked `sync: false`; everything else is set here.
+# It creates two things: the app, and a free Key Value instance (Redis-compatible) for the
+# answer cache and the visit-booking tracker. MongoDB comes from Atlas.
 #
 # Render's free instance has 512 MB of memory and a tenth of a CPU. Speech runs on Gnani's
 # servers, so voice works here; only the local embedding model is left out (it needs about
@@ -24,8 +26,12 @@ services:
       # Secrets and model IDs, entered in Render's dashboard and never committed
       - key: MONGO_URI
         sync: false
+      # Render's own Key Value instance below, wired up automatically
       - key: REDIS_URL
-        sync: false
+        fromService:
+          type: keyvalue
+          name: goldloan-redis
+          property: connectionString
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_TEXT_MODEL
@@ -67,3 +73,12 @@ services:
       # otherwise every visitor would share one rate limit
       - key: FORWARDED_ALLOW_IPS
         value: "*"
+
+  # Redis-compatible, free: 25 MB and no persistence, which suits a cache. Losing it on a
+  # restart only means the first answers come from Gemini again.
+  - type: keyvalue
+    name: goldloan-redis
+    plan: free
+    region: singapore
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []  # no access from the internet: only services in this Render account
