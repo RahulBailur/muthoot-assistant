@@ -77,7 +77,8 @@ describe("customer login", () => {
       phone: "9000000201",
       otp: "482913",
     });
-    expect(localStorage.getItem("goldloan_token")).toBe("jwt");
+    expect(sessionStorage.getItem("goldloan_token")).toBe("jwt");
+    expect(localStorage.getItem("goldloan_token")).toBeNull(); // other tabs are not logged in
   });
 
   test("the code screen says the assistant will never ask for it", async () => {

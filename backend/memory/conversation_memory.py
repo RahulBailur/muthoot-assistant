@@ -3,6 +3,7 @@
 from beanie import PydanticObjectId
 
 from agents.intent_data import Intent
+from agents.languages import LANGUAGES, Language
 from models.conversation_turn import ConversationTurn
 from services.llm import Message
 
@@ -34,6 +35,13 @@ async def last_intent(user_id: PydanticObjectId, session_id: str) -> Intent | No
     return Intent(turns[0].intent) if turns else None
 
 
+async def chosen_language(user_id: PydanticObjectId, session_id: str) -> Language | None:
+    """The language the customer asked for earlier in this conversation, if they did."""
+    turns = await _latest(user_id, session_id, 1)
+    chosen = turns[0].chosen_language if turns else ""
+    return chosen if chosen in LANGUAGES else None
+
+
 async def remember(
     user_id: PydanticObjectId,
     session_id: str,
@@ -41,6 +49,7 @@ async def remember(
     reply: str,
     intent: Intent,
     note: str = "",
+    language: Language | None = None,
 ) -> None:
     for role, text in (("user", user_text), ("assistant", reply)):
         await ConversationTurn(
@@ -50,4 +59,5 @@ async def remember(
             text=text,
             intent=intent.value,
             note=note if role == "assistant" else "",
+            chosen_language=(language or "") if role == "assistant" else "",
         ).insert()

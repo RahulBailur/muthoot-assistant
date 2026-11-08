@@ -5,6 +5,7 @@ from agents.intent_classifier import normalise
 from agents.intent_data import Intent
 from agents.languages import Language
 from services import gold
+from services.llm import Message
 from time_utils import today_ist
 from tools import ToolContext
 from tools.branch_tools import get_gold_rate
@@ -61,7 +62,7 @@ async def facts_fingerprint() -> str:
     return hashlib.sha256(f"{FAQ_VERSION}:{today_ist()}:{rate}".encode()).hexdigest()[:16]
 
 
-async def fallback(context: ToolContext, text: str) -> tuple[str, Language]:
+async def fallback(context: ToolContext, text: str, history: list[Message]) -> tuple[str, Language]:
     """The rule-based knowledge base."""
     asked_for = topic(text)
     if asked_for == "gold_rate":

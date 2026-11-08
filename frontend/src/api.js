@@ -2,25 +2,27 @@ import axios from "axios";
 
 const TOKEN_KEY = "goldloan_token";
 
-// localStorage can be unavailable (private windows, blocked site data), so never let it throw
+// Kept per tab (sessionStorage): a customer in one tab and branch staff in another stay
+// logged in as themselves. It survives a reload; closing the tab logs that tab out.
+// Storage can be unavailable (private windows, blocked site data), so never let it throw
 export const tokenStore = {
   get() {
     try {
-      return localStorage.getItem(TOKEN_KEY);
+      return sessionStorage.getItem(TOKEN_KEY);
     } catch {
       return null;
     }
   },
   set(token) {
     try {
-      localStorage.setItem(TOKEN_KEY, token);
+      sessionStorage.setItem(TOKEN_KEY, token);
     } catch {
       /* the session simply won't survive a reload */
     }
   },
   clear() {
     try {
-      localStorage.removeItem(TOKEN_KEY);
+      sessionStorage.removeItem(TOKEN_KEY);
     } catch {
       /* nothing to clear */
     }

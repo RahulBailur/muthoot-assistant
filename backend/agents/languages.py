@@ -7,6 +7,7 @@ model writes in the customer's language, and the rule-based replies of other age
 Translations were written for the demo; have a native speaker check them before real use.
 """
 
+import re
 from typing import Literal
 
 Language = Literal["en", "hi", "kn", "ml", "ta"]
@@ -162,3 +163,41 @@ OFFER_VISIT: dict[Language, str] = {
     "ml": "നിങ്ങളുടെ സ്വർണം മൂല്യനിർണയം ചെയ്യാൻ ഒരു ബ്രാഞ്ച് സന്ദർശനം ബുക്ക് ചെയ്യട്ടേ?",
     "ta": "உங்கள் தங்கத்தை மதிப்பிட கிளை வருகையை முன்பதிவு செய்யட்டுமா?",
 }
+
+# --- asking for a language -------------------------------------------------------------
+
+# Each language's name as a customer might write it, in Latin script and in our scripts
+_LANGUAGE_NAMES: dict[Language, tuple[str, ...]] = {
+    "en": ("english", "angrezi", "अंग्रेज़ी", "अंग्रेजी", "ಇಂಗ್ಲಿಷ್", "ഇംഗ്ലീഷ്", "ஆங்கில"),
+    "hi": ("hindi", "हिंदी", "हिन्दी", "ಹಿಂದಿ", "ഹിന്ദി", "இந்தி", "ஹிந்தி"),
+    "kn": ("kannada", "कन्नड़", "कन्नड", "ಕನ್ನಡ", "കന്നഡ", "கன்னட"),
+    "ml": ("malayalam", "मलयालम", "ಮಲಯಾಳ", "മലയാള", "மலையாள"),
+    "ta": ("tamil", "तमिल", "ತಮಿಳು", "തമിഴ്", "தமிழ்"),
+}
+
+# Words that make a Latin-script mention of a language a request: "answer in Tamil",
+# "Malayalam mein batao", "speak Kannada". A bare mention is not ("Tamil Nadu branches").
+_REQUEST_CUES = re.compile(
+    r"\b(in|into|mein|me|main|language|bhasha|speak|talk|reply|answer|respond|say|tell|"
+    r"explain|translate|bolo|batao|bol|switch|change)\b"
+)
+# Places named after a language are not a request for it
+_NOT_A_REQUEST = re.compile(r"tamil\s*nadu|தமிழ்நாடு|तमिलनाडु|ತಮಿಳುನಾಡು|തമിഴ്നാട്")
+
+
+def requested_language(text: str) -> Language | None:
+    """The language the customer asks the assistant to use, if they ask for exactly one."""
+    lowered = text.lower()
+    if _NOT_A_REQUEST.search(lowered):
+        return None
+    named = [
+        language
+        for language, names in _LANGUAGE_NAMES.items()
+        if any(name in lowered for name in names)
+    ]
+    if len(named) != 1:
+        return None
+    latin_only = all(name.isascii() for name in _LANGUAGE_NAMES[named[0]] if name in lowered)
+    if latin_only and not _REQUEST_CUES.search(lowered):
+        return None
+    return named[0]

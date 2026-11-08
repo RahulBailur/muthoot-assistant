@@ -1,6 +1,7 @@
 from agents.base import Agent
 from agents.intent_data import Intent
 from agents.languages import CAPABILITIES, Language
+from services.llm import Message
 from tools import ToolContext
 
 INSTRUCTIONS = """You handle greetings, thanks and anything that is not about loan \
@@ -11,7 +12,7 @@ and complaints.
 - Politely decline anything outside that."""
 
 
-async def fallback(context: ToolContext, text: str) -> tuple[str, Language]:
+async def fallback(context: ToolContext, text: str, history: list[Message]) -> tuple[str, Language]:
     return CAPABILITIES[context.language], context.language
 
 

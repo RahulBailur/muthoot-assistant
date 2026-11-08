@@ -29,8 +29,9 @@ Say an account number only as its last four digits, and never say a phone number
 State only facts returned by your tools. Never invent branches, slots, amounts or dates.
 Say times exactly as the tools give them in local_time, and amounts as the tools format them."""
 
-# Rule-based reply for when no LLM answer is available, and the language it is in
-Fallback = Callable[[ToolContext, str], Awaitable[tuple[str, Language]]]
+# Rule-based reply for when no LLM answer is available, and the language it is in.
+# Given the conversation so far, so a follow-up can reuse what was said before it.
+Fallback = Callable[[ToolContext, str, list[Message]], Awaitable[tuple[str, Language]]]
 # Told "routed", "tool" and "generating" as a turn moves along (drives the voice UI)
 Progress = Callable[[str], Awaitable[None]]
 # Looks up what an agent needs before the model is asked: {tool name: its result}.
@@ -146,7 +147,7 @@ async def run_agent(
     done = [note for note in notes if note.split(" ", 1)[0] in OUTCOME_KEYS]
     if len(done) != len(notes):
         await drop_proposals(context)
-    reply, language = await agent.fallback(context, text)
+    reply, language = await agent.fallback(context, text, history)
     if done:
         reply, language = f"Done: {'; '.join(done)}. {reply}", "en"
     return AgentReply(reply, False, language, called, done)

@@ -51,10 +51,11 @@ def _number(grams: float) -> str:
     return f"{grams:g}"
 
 
-async def fallback(context: ToolContext, text: str) -> tuple[str, Language]:
-    """The headline demo without any model: the estimate, in the customer's own language."""
+async def fallback(context: ToolContext, text: str, history: list[Message]) -> tuple[str, Language]:
+    """The headline demo without any model: the estimate, in the customer's own language.
+    The weight can come from earlier in the conversation ("now say it in Malayalam")."""
     language = context.language
-    gold = parse_gold(text)
+    gold = _gold_in_conversation(text, history)
     if gold.grams is None or gold.grams > 1000:
         return ASK_GRAMS[language], language
     carat = gold.carat or DEFAULT_CARAT
