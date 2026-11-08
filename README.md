@@ -22,6 +22,10 @@
 
 <br/>
 
+**[▶ Try the live demo](https://goldloan-assistant.onrender.com)** · customer `9000000201` (the one-time code is shown on screen) · may take a minute to wake
+
+<br/>
+
 <!-- DEMO-GIF -->
 
 [Features](#-features) •
@@ -239,6 +243,14 @@ docker compose exec app python -m scripts.seed_data
 `docker compose down` stops everything; add `-v` to also delete the data. Set `APP_PORT=8001` to publish the app on another port.
 
 ### Public demo (Render, free)
+
+**Live at https://goldloan-assistant.onrender.com**
+
+| Role | Log in with |
+|---|---|
+| Customer | mobile `9000000201`, then the code shown on screen |
+| Branch staff (Kochi) | mobile `9000000101`, password `goldloan-demo-1` |
+| Admin (analytics page) | mobile `9000000100`, password `goldloan-demo-1` |
 
 [`render.yaml`](render.yaml) is a Render Blueprint that deploys the app and a Render Key Value instance (Redis-compatible) together, with MongoDB on Atlas, all on free tiers. The demo data is seeded automatically on the first start.
 
