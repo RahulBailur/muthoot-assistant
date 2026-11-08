@@ -240,7 +240,7 @@ docker compose exec app python -m scripts.seed_data
 
 ### Public demo (Render, free)
 
-[`render.yaml`](render.yaml) is a Render Blueprint that deploys the app with MongoDB Atlas and Upstash Redis, all on free tiers. The demo data is seeded automatically on the first start.
+[`render.yaml`](render.yaml) is a Render Blueprint that deploys the app and a Render Key Value instance (Redis-compatible) together, with MongoDB on Atlas, all on free tiers. The demo data is seeded automatically on the first start.
 
 Render's free instance has 512 MB of memory and a tenth of a CPU. Speech runs on Gnani's servers, so **voice works there too**; only the local embedding model is left out, and routing uses the keyword rules with Gemini for the rest.
 
