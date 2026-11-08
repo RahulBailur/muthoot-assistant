@@ -26,7 +26,7 @@
 
 <br/>
 
-<!-- DEMO-GIF -->
+<img src="docs/demo.gif" width="860" alt="A customer asks for a loan estimate and hears it in Hindi with the disclaimer, then branch staff see today's bookings with phone numbers masked."/>
 
 [Features](#-features) •
 [The assistant](#-the-assistant) •
@@ -86,6 +86,7 @@ This assistant answers them by voice or text in five Indian languages, books the
 - **Routing** happens locally first: keyword rules, then a multilingual sentence-embedding model. Only a message neither is sure about is sent to Gemini to classify.
 - **Two-step confirmation.** `book_visit`, `cancel_visit` and `raise_ticket` change nothing the first time they are called. The change goes through only when the customer says yes in the *next* turn, so a model can never book in the same breath as it suggests it.
 - **The customer's identity never comes from the model.** Every tool takes it from the verified session, and any ID a model passes is dropped.
+- **The customer chooses the language.** The assistant answers in the language the customer writes or speaks in; *"answer in Malayalam"*, *"Tamil mein batao"* or *"മലയാളത്തിൽ പറയൂ"* repeats the last answer in that language and keeps to it, even when the customer types in English, until they ask for another.
 - **The headline estimate needs no model at all.** Grams, pavan, tola and carat are read from the customer's words (digits or common English and Hindi number words), and the reply is written in the customer's own language from templates. With Gemini down, the demo still works.
 
 ### Voice

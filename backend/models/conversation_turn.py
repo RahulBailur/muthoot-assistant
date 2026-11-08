@@ -11,7 +11,7 @@ MEMORY_TTL_SECONDS = 24 * 60 * 60
 
 
 class ConversationTurn(Document):
-    """One line of a the assistant conversation, kept so follow-up questions resolve.
+    """One line of an assistant conversation, kept so follow-up questions resolve.
 
     Keyed by user as well as session, so a session ID alone never opens someone else's
     conversation. MongoDB deletes turns a day after they were written.
@@ -24,6 +24,9 @@ class ConversationTurn(Document):
     intent: str
     # What the assistant's tools did or proposed in this turn; shown to the model, not the customer
     note: str = ""
+    # On assistant turns: the language the customer asked the assistant to keep to
+    # ("answer in Malayalam"), carried from turn to turn; empty if they never asked
+    chosen_language: str = ""
     created_at: datetime = Field(default_factory=now_utc)
 
     class Settings:

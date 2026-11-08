@@ -22,7 +22,7 @@ async def preload(
     return {GET_MY_LOANS.name: await run_tool(GET_MY_LOANS, context, {})}
 
 
-async def fallback(context: ToolContext, text: str) -> tuple[str, Language]:
+async def fallback(context: ToolContext, text: str, history: list[Message]) -> tuple[str, Language]:
     result = await get_my_loans(context, {})
     if "error" in result:
         return "Loan details are only available from a customer account.", "en"

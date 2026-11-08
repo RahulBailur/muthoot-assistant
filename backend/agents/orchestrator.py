@@ -22,7 +22,7 @@ from agents.intent_classifier import (
     normalise,
 )
 from agents.intent_data import Intent
-from agents.languages import Language
+from agents.languages import Language, requested_language
 from agents.visit_agent import VISIT_AGENT
 from memory import conversation_memory as memory
 from models.user import User
@@ -142,27 +142,38 @@ async def _run_text_turn(
     assert user.id is not None  # noqa: S101 — loaded from the database
     llm = llm or get_llm()
     local = (classifier or classifier_for_requests()).classify(text)
+    # "Answer in Malayalam": the asked-for language holds for the rest of the conversation,
+    # also when the customer types in English, until they ask for another. Writing in one of
+    # our Indian languages is the clearest request of all, so that turn is answered in it.
+    asked = requested_language(text)
+    chosen = asked or await memory.chosen_language(user.id, session_id)
+    language = chosen if chosen and (asked or local.language == "en") else local.language
     context = ToolContext(
         user=user,
-        language=local.language,
+        language=language,
         session_id=session_id,
         turn_id=secrets.token_hex(8),
     )
 
     # Input guardrails: before any model or agent sees the turn
-    checked = check_input(text, local.language)
+    checked = check_input(text, language)
     if checked.risk is not None and checked.reply is not None:
         if progress:
             await progress("routed")
         await expire_older_proposals(context)  # a secret is not a "yes" to anything
         await memory.remember(
-            user.id, session_id, checked.stored_text, checked.reply, Intent.GENERAL
+            user.id,
+            session_id,
+            checked.stored_text,
+            checked.reply,
+            Intent.GENERAL,
+            language=chosen,
         )
         return TurnResult(
             reply=checked.reply,
             intent=Intent.GENERAL,
             language=local.language,
-            reply_language=local.language,
+            reply_language=language,
             routed_by="guardrail",
             used_llm=False,
             blocked=True,
@@ -172,7 +183,13 @@ async def _run_text_turn(
 
     history = await memory.recent_messages(user.id, session_id)
     previous = await memory.last_intent(user.id, session_id)
-    intent, routed_by = await _route(local, text, history, previous, llm)
+    intent: Intent
+    routed_by: Routing
+    if asked and previous not in (None, Intent.GENERAL) and not any(keyword_scores(text).values()):
+        # Only a language asked for ("say that in Tamil"): the same topic again, in it
+        intent, routed_by = previous, "previous"
+    else:
+        intent, routed_by = await _route(local, text, history, previous, llm)
     if progress:
         await progress("routed")
     if intent == Intent.VISIT:
@@ -180,7 +197,7 @@ async def _run_text_turn(
         await track_booking(context, "intent_classified")
 
     cache = cache or get_response_cache()
-    key = await _cache_key(intent, routed_by, text, local.language) if cache.enabled else None
+    key = await _cache_key(intent, routed_by, text, language) if cache.enabled else None
     if key and (hit := await cache.get(key)):
         result = TurnResult(
             reply=hit["reply"],
@@ -193,7 +210,7 @@ async def _run_text_turn(
             answered_by="cache",
         )
         await expire_older_proposals(context)
-        await memory.remember(user.id, session_id, text, result.reply, intent)
+        await memory.remember(user.id, session_id, text, result.reply, intent, language=chosen)
         return result
 
     answer = await run_agent(AGENTS[intent], context, text, history, llm, progress)
@@ -225,6 +242,12 @@ async def _run_text_turn(
     if key and answer.used_llm and not guarded.blocked:
         await cache.set(key, {"reply": result.reply, "reply_language": result.reply_language})
     await memory.remember(
-        user.id, session_id, redact_secrets(text), result.reply, intent, "; ".join(answer.notes)
+        user.id,
+        session_id,
+        redact_secrets(text),
+        result.reply,
+        intent,
+        "; ".join(answer.notes),
+        language=chosen,
     )
     return result

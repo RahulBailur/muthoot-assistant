@@ -387,3 +387,75 @@ async def test_an_open_circuit_skips_the_provider(client: AsyncClient) -> None:
     assert breaker.state == "open"
     assert "gemini:circuit_open" in result.llm_errors
     assert result.answered_by == "rules"
+
+
+# --- asking for a language ---------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("text", "language"),
+    [
+        ("Can you answer this in Malayalam? The same sentences you just repeated.", "ml"),
+        ("Tamil mein batao", "ta"),
+        ("മലയാളത്തിൽ പറയൂ", "ml"),
+        ("मुझे हिंदी में बताओ", "hi"),
+        ("please reply in Kannada", "kn"),
+        ("answer in English please", "en"),
+        ("Do you have a branch in Tamil Nadu?", None),  # a place, not a request
+        ("I speak Hindi and Tamil", None),  # two languages: no single choice
+        ("kannada", None),  # a bare name in Latin script is not a request
+        ("What is my outstanding amount?", None),
+    ],
+)
+def test_a_request_for_a_language_is_recognised(text: str, language: str | None) -> None:
+    from agents.languages import requested_language
+
+    assert requested_language(text) == language
+
+
+async def test_say_that_again_in_malayalam_repeats_the_estimate_in_it(client: AsyncClient) -> None:
+    """What the demo recording showed: the follow-up got an English "how many grams?"."""
+    customer = await make_user()
+    await turn(customer, "Mere paas 30 gram sona hai, kitna loan milega?")
+
+    result = await turn(
+        customer, "Can you answer this in Malayalam? The same sentences you just repeated."
+    )
+
+    assert result.intent == "calculator" and result.routed_by == "previous"
+    assert result.reply_language == "ml"
+    assert "₹2,22,700" in result.reply and "വായ്പ" in result.reply
+    assert result.disclaimer == ESTIMATE_DISCLAIMER["ml"]
+
+
+async def test_the_chosen_language_holds_until_another_is_asked_for(client: AsyncClient) -> None:
+    customer = await make_user()
+    await turn(customer, "Tamil mein batao")
+
+    in_english = await turn(customer, "hello")
+    back = await turn(customer, "answer in English please")
+    after = await turn(customer, "hello")
+
+    assert in_english.reply == CAPABILITIES["ta"]
+    assert back.reply_language == "en"
+    assert after.reply == CAPABILITIES["en"]
+
+
+async def test_writing_in_another_indian_language_answers_in_that_one(client: AsyncClient) -> None:
+    customer = await make_user()
+    await turn(customer, "please reply in Malayalam")
+
+    result = await turn(customer, "मेरे पास 30 ग्राम सोना है, कितना लोन मिलेगा?")
+
+    assert result.reply_language == "hi"
+
+
+async def test_the_model_is_told_the_chosen_language(client: AsyncClient) -> None:
+    customer = await make_user()
+    llm = ScriptedLLM(script=["சரி", "உங்கள் நிலுவை ₹1,00,000"])
+    await make_loan(customer, await make_branch())
+
+    await turn(customer, "Tamil mein batao", llm)
+    await turn(customer, "What is my outstanding amount?", llm)
+
+    assert "Reply in Tamil." in llm.calls[-1].system
